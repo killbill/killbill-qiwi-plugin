@@ -7,15 +7,8 @@ describe Killbill::Qiwi::PaymentPlugin do
   include ::Killbill::Plugin::ActiveMerchant::RSpec
 
   before(:each) do
-    @plugin = Killbill::Qiwi::PaymentPlugin.new
-
-    @account_api    = ::Killbill::Plugin::ActiveMerchant::RSpec::FakeJavaUserAccountApi.new
-    svcs            = {:account_user_api => @account_api}
-    @plugin.kb_apis = Killbill::Plugin::KillbillApi.new('qiwi', svcs)
-
-    @plugin.logger       = Logger.new(STDOUT)
-    @plugin.logger.level = Logger::INFO
-    @plugin.conf_dir     = File.expand_path(File.dirname(__FILE__) + '../../../../')
+    # Start the plugin early to configure ActiveRecord
+    @plugin = build_plugin(::Killbill::Qiwi::PaymentPlugin, 'qiwi')
     @plugin.start_plugin
   end
 

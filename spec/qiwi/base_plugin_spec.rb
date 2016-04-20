@@ -1,9 +1,12 @@
 require 'spec_helper'
 
 describe Killbill::Qiwi::PaymentPlugin do
+
+  include ::Killbill::Plugin::ActiveMerchant::RSpec
+
   before(:each) do
     Dir.mktmpdir do |dir|
-      file = File.new(File.join(dir, 'qiwi.yml'), "w+")
+      file = File.new(File.join(dir, 'qiwi.yml'), 'w+')
       file.write(<<-eos)
 :qiwi:
   :test: true
@@ -14,11 +17,7 @@ describe Killbill::Qiwi::PaymentPlugin do
       eos
       file.close
 
-      @plugin              = Killbill::Qiwi::PaymentPlugin.new
-      @plugin.logger       = Logger.new(STDOUT)
-      @plugin.logger.level = Logger::INFO
-      @plugin.conf_dir     = File.dirname(file)
-      @plugin.kb_apis      = Killbill::Plugin::KillbillApi.new('qiwi', {})
+      @plugin = build_plugin(::Killbill::Qiwi::PaymentPlugin, 'qiwi', File.dirname(file))
 
       # Start the plugin here - since the config file will be deleted
       @plugin.start_plugin
@@ -42,7 +41,7 @@ describe Killbill::Qiwi::PaymentPlugin do
 
     form.kb_account_id.should == kb_account_id
     form.form_method.should == 'GET'
-    form.form_url.should == 'https://w.qiwi.ru/payments.action'
+    form.form_url.should == 'https://w.qiwi.com/payment/form.action'
 
     form_fields = @plugin.properties_to_hash(form.form_fields)
     form_fields.size.should == 3

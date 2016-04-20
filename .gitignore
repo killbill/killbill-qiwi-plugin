@@ -19,18 +19,17 @@ _yardoc
 doc/
 
 .jbundler
-Jarfile.lock
-Gemfile.lock
 
 .DS_Store
 
-# Build directory
-killbill-qiwi/
-
 # Testing database
 test.db
+
+qiwi.log
 
 target
 pom.xml.asc
 
 .idea/
+
+Gemfile.head.lock

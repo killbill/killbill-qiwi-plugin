@@ -18,11 +18,7 @@ end
 
 helpers do
   def plugin(session = {})
-    ::Killbill::Qiwi::PrivatePaymentPlugin.new(:qiwi,
-                                               ::Killbill::Qiwi::QiwiPaymentMethod,
-                                               ::Killbill::Qiwi::QiwiTransaction,
-                                               ::Killbill::Qiwi::QiwiResponse,
-                                               session)
+    ::Killbill::Qiwi::PrivatePaymentPlugin.new(session)
   end
 end
 
