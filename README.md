@@ -29,16 +29,8 @@ curl -v \
      -H 'X-Killbill-CreatedBy: admin' \
      -H 'Content-Type: text/plain' \
      -d ':qiwi:
-  - :account_id: "merchant_account_1"
-  - :account_id: "merchant_account_2"' \
+  :account_id: "your-account-id"' \
      http://127.0.0.1:8080/1.0/kb/tenants/uploadPluginConfig/killbill-qiwi
-```
-
-To go to production, create a `qiwi.yml` configuration file under `/var/tmp/bundles/plugins/ruby/killbill-qiwi/x.y.z/` containing the following:
-
-```
-:qiwi:
-  :test: false
 ```
 
 Usage
@@ -61,4 +53,62 @@ curl -v \
        }
      }' \
      "http://127.0.0.1:8080/1.0/kb/accounts/<ACCOUNT_ID>/paymentMethods?isDefault=true"
+```
+
+Call [buildFormDescriptor](http://docs.killbill.io/0.16/userguide_payment.html#_hosted_payment_page_flow):
+
+```
+curl -v \
+     -u admin:password \
+     -H 'X-Killbill-ApiKey: bob' \
+     -H 'X-Killbill-ApiSecret: lazar' \
+     -H 'Content-Type: application/json' \
+     -H 'X-Killbill-CreatedBy: demo' \
+     -X POST \
+     --data-binary '{
+       "formFields": [
+         {
+           "key": "order_id",
+           "value": "1234"
+         },
+         {
+           "key": "amount",
+           "value": "750"
+         }
+       ]
+     }' \
+     "http://127.0.0.1:8080/1.0/kb/paymentGateways/hosted/form/<ACCOUNT_ID>"
+```
+
+The response will look like:
+
+```
+{
+  "kbAccountId": "<ACCOUNT_ID>",
+  "formMethod": "GET",
+  "formUrl": "https://w.qiwi.com/payment/form.action",
+  "formFields": {
+    "amount": "750",
+    "id": "1234",
+    "provider": "11223344"
+  },
+  "properties": {},
+  "auditLogs": null
+}
+```
+
+This indicates that the user should be redirected to https://w.qiwi.com/payment/form.action?amount=750&id=1234&provider=11223344.
+
+Upon success, following the redirect from QIWI, record the payment in Kill Bill:
+
+```
+curl -v \
+     -X POST \
+     -u admin:password \
+     -H 'Content-Type: application/json' \
+     -H 'X-Killbill-ApiKey:bob' \
+     -H 'X-Killbill-ApiSecret:lazar' \
+     -H 'X-Killbill-CreatedBy: creator' \
+     --data-binary '{"transactionType":"PURCHASE","amount":"750"}' \
+     "http://127.0.0.1:8080/1.0/kb/accounts/<ACCOUNT_ID>/payments"
 ```
